@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server/src/index.js",
   "scripts": {
-    "start": "node server/src/index.js"
+    "start": "node server/src/index.js",
+      "heroku-postbuild": "echo 'No build step required'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
