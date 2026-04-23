@@ -2,8 +2,6 @@
 
 A web application for managing farmers and agricultural activities, built as a technical assessment for Farm Mall.
 
-## 🔗 Live Demo
-[https://your-koyeb-url.koyeb.app](https://your-koyeb-url.koyeb.app)
 
 > **Test Accounts:**
 > - Admin: `admin@farmmall.com` / `admin123`
