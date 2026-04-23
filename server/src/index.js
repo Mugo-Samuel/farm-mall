@@ -24,7 +24,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve React frontend in production
-// Serve React frontend in production
 const frontendPath = path.join(__dirname, '../../client/dist');
 console.log('Frontend path:', frontendPath);
 console.log('Frontend exists:', fs.existsSync(frontendPath));
@@ -39,3 +38,12 @@ if (fs.existsSync(frontendPath)) {
     res.send('Farm Mall API is running 🌱 - Frontend not found');
   });
 }
+
+// START SERVER ← this was missing!
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} 🌱`);
+}).on('error', (err) => {
+  console.error('Server failed to start:', err);
+  process.exit(1);
+});
