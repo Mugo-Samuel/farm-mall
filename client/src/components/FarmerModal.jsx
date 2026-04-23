@@ -1,125 +1,50 @@
 import { useState, useEffect } from 'react';
 
 const FarmerModal = ({ isOpen, onClose, onSubmit, farmer, loading }) => {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    location: '',
-    crop: '',
-    phone: ''
-  });
+  const [form, setForm] = useState({ name: '', email: '', location: '', crop: '', phone: '' });
 
   useEffect(() => {
-    if (farmer) {
-      setForm({
-        name: farmer.name || '',
-        email: farmer.email || '',
-        location: farmer.location || '',
-        crop: farmer.crop || '',
-        phone: farmer.phone || ''
-      });
-    } else {
-      setForm({ name: '', email: '', location: '', crop: '', phone: '' });
-    }
+    setForm(farmer ? { name: farmer.name || '', email: farmer.email || '', location: farmer.location || '', crop: farmer.crop || '', phone: farmer.phone || '' }
+      : { name: '', email: '', location: '', crop: '', phone: '' });
   }, [farmer, isOpen]);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(form);
-  };
 
   if (!isOpen) return null;
 
+  const inputStyle = { width: '100%', border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '11px 14px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', marginTop: '6px' };
+  const fields = [
+    { label: 'Full Name *', name: 'name', type: 'text', placeholder: 'e.g. John Kamau' },
+    { label: 'Email Address *', name: 'email', type: 'email', placeholder: 'e.g. john@email.com' },
+    { label: 'Location', name: 'location', type: 'text', placeholder: 'e.g. Nakuru, Kenya' },
+    { label: 'Main Crop', name: 'crop', type: 'text', placeholder: 'e.g. Maize, Tomatoes, Tea' },
+    { label: 'Phone Number', name: 'phone', type: 'text', placeholder: 'e.g. +254 712 345 678' },
+  ];
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="bg-green-700 rounded-t-2xl px-6 py-4 flex justify-between items-center">
-          <h2 className="text-white font-bold text-lg">
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+      <div style={{ background: 'white', borderRadius: '20px', width: '100%', maxWidth: '440px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}>
+        <div style={{ background: 'linear-gradient(135deg, #166534, #15803d)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ color: 'white', fontWeight: '700', fontSize: '18px', margin: 0 }}>
             {farmer ? '✏️ Edit Farmer' : '➕ Add New Farmer'}
           </h2>
-          <button onClick={onClose} className="text-white hover:text-green-200 text-2xl leading-none">×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder="e.g. John Kamau"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              placeholder="e.g. john@email.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-              placeholder="e.g. Nakuru, Kenya"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Main Crop</label>
-            <input
-              type="text"
-              name="crop"
-              value={form.crop}
-              onChange={handleChange}
-              placeholder="e.g. Maize, Tomatoes, Tea"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder="e.g. +254 712 345 678"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          <div className="flex space-x-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
-            >
+        <form onSubmit={e => { e.preventDefault(); onSubmit(form); }} style={{ padding: '24px' }}>
+          {fields.map(({ label, name, type, placeholder }) => (
+            <div key={name} style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '13px', fontWeight: '500', color: '#374151' }}>{label}</label>
+              <input type={type} name={name} value={form[name]} placeholder={placeholder} required={label.includes('*')}
+                onChange={e => setForm({ ...form, [e.target.name]: e.target.value })}
+                style={inputStyle}
+                onFocus={e => e.target.style.borderColor = '#166534'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <button type="button" onClick={onClose}
+              style={{ flex: 1, border: '1.5px solid #e5e7eb', background: 'white', color: '#374151', padding: '12px', borderRadius: '10px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-green-700 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-800 transition disabled:opacity-60"
-            >
+            <button type="submit" disabled={loading}
+              style={{ flex: 1, background: loading ? '#86efac' : '#166534', color: 'white', border: 'none', padding: '12px', borderRadius: '10px', fontWeight: '600', fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer' }}>
               {loading ? 'Saving...' : farmer ? 'Update Farmer' : 'Add Farmer'}
             </button>
           </div>

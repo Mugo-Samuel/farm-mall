@@ -11,145 +11,108 @@ const FarmerDashboard = () => {
   const [weatherError, setWeatherError] = useState('');
 
   const fetchWeather = async () => {
-    if (!city.trim()) {
-      setWeatherError('Please enter a city name.');
-      return;
-    }
-    setWeatherLoading(true);
-    setWeatherError('');
-    setWeather(null);
+    if (!city.trim()) { setWeatherError('Please enter a city name.'); return; }
+    setWeatherLoading(true); setWeatherError(''); setWeather(null);
     try {
       const res = await API.get(`/weather?city=${encodeURIComponent(city)}`);
       setWeather(res.data);
     } catch (err) {
-      setWeatherError(err.response?.data?.message || 'Could not fetch weather. Try again.');
-    } finally {
-      setWeatherLoading(false);
-    }
+      setWeatherError(err.response?.data?.message || 'Could not fetch weather.');
+    } finally { setWeatherLoading(false); }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') fetchWeather();
-  };
+  const tips = [
+    { icon: '💧', title: 'Irrigation', tip: 'Water crops early morning to reduce evaporation.' },
+    { icon: '🌱', title: 'Crop Rotation', tip: 'Rotate crops each season to maintain soil health.' },
+    { icon: '🐛', title: 'Pest Control', tip: 'Regularly inspect crops for pests and diseases.' },
+    { icon: '📦', title: 'Record Keeping', tip: 'Keep records of your yield for better planning.' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#f0fdf4' }}>
       <Navbar />
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Welcome Card */}
-        <div className="bg-gradient-to-r from-green-700 to-green-600 rounded-2xl p-8 text-white mb-8 shadow-lg">
-          <div className="flex items-center space-x-4">
-            <div className="bg-white bg-opacity-20 rounded-full p-4">
-              <span className="text-4xl">👨‍🌾</span>
-            </div>
+        <div style={{ background: 'linear-gradient(135deg, #166534, #15803d)', borderRadius: '20px', padding: '32px', marginBottom: '24px', boxShadow: '0 4px 20px rgba(22,101,52,0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '72px', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', flexShrink: 0 }}>👨‍🌾</div>
             <div>
-              <p className="text-green-200 text-sm font-medium uppercase tracking-wide">Welcome back</p>
-              <h1 className="text-3xl font-bold">{user?.name} 🌱</h1>
-              <p className="text-green-200 text-sm mt-1">{user?.email}</p>
+              <p style={{ color: '#86efac', fontSize: '13px', fontWeight: '500', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Welcome back</p>
+              <h1 style={{ color: 'white', fontSize: '28px', fontWeight: '700', margin: '0 0 4px' }}>{user?.name} 🌱</h1>
+              <p style={{ color: '#bbf7d0', fontSize: '14px', margin: 0 }}>{user?.email}</p>
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="bg-white bg-opacity-10 rounded-xl p-4">
-              <p className="text-green-200 text-xs uppercase tracking-wide">Role</p>
-              <p className="text-white font-semibold capitalize mt-1">🌾 {user?.role}</p>
-            </div>
-            <div className="bg-white bg-opacity-10 rounded-xl p-4">
-              <p className="text-green-200 text-xs uppercase tracking-wide">Status</p>
-              <p className="text-white font-semibold mt-1">✅ Active</p>
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {[{ label: 'Role', value: `🌾 ${user?.role}` }, { label: 'Status', value: '✅ Active' }].map(({ label, value }) => (
+              <div key={label} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '16px' }}>
+                <p style={{ color: '#86efac', fontSize: '12px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
+                <p style={{ color: 'white', fontWeight: '600', margin: 0, textTransform: 'capitalize' }}>{value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Weather Widget */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
-          <h2 className="text-gray-800 font-bold text-lg mb-1">🌤️ Weather & Farming Insights</h2>
-          <p className="text-gray-500 text-sm mb-5">Enter your farm's location to get today's weather and farming tips.</p>
-
-          <div className="flex space-x-3 mb-5">
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => { setCity(e.target.value); setWeatherError(''); }}
-              onKeyDown={handleKeyDown}
+        {/* Weather Card */}
+        <div style={{ background: 'white', borderRadius: '20px', padding: '28px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '6px', color: '#111' }}>🌤️ Weather & Farming Insights</h2>
+          <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '20px' }}>Enter your farm's location to get today's weather and farming tips.</p>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+            <input type="text" value={city} onChange={e => { setCity(e.target.value); setWeatherError(''); }}
+              onKeyDown={e => e.key === 'Enter' && fetchWeather()}
               placeholder="Enter city (e.g. Nakuru, Nairobi)"
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <button
-              onClick={fetchWeather}
-              disabled={weatherLoading}
-              className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg text-sm font-semibold transition disabled:opacity-60"
-            >
+              style={{ flex: 1, border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '12px 16px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+              onFocus={e => e.target.style.borderColor = '#166534'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+            <button onClick={fetchWeather} disabled={weatherLoading}
+              style={{ background: '#166534', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: '600', fontSize: '14px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
               {weatherLoading ? '...' : 'Search'}
             </button>
           </div>
-
-          {weatherError && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-4">
-              ⚠️ {weatherError}
-            </div>
-          )}
-
+          {weatherError && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', marginBottom: '12px' }}>⚠️ {weatherError}</div>}
           {weather && (
-            <div className="space-y-4">
-              {/* Weather Stats */}
-              <div className="bg-green-50 rounded-xl p-5">
-                <div className="flex justify-between items-start">
+            <div>
+              <div style={{ background: '#f0fdf4', borderRadius: '14px', padding: '20px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
-                    <p className="text-green-800 font-bold text-xl">
-                      📍 {weather.city}, {weather.country}
-                    </p>
-                    <p className="text-gray-600 text-sm capitalize mt-1">{weather.condition}</p>
+                    <p style={{ fontWeight: '700', fontSize: '20px', color: '#166534', margin: '0 0 4px' }}>📍 {weather.city}, {weather.country}</p>
+                    <p style={{ color: '#6b7280', fontSize: '14px', margin: 0, textTransform: 'capitalize' }}>{weather.condition}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-green-700 font-bold text-3xl">{weather.temp}°C</p>
-                  </div>
+                  <p style={{ color: '#166534', fontWeight: '700', fontSize: '36px', margin: 0 }}>{weather.temp}°C</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <p className="text-gray-500 text-xs">Humidity</p>
-                    <p className="text-gray-800 font-bold text-lg">{weather.humidity}%</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <p className="text-gray-500 text-xs">Wind Speed</p>
-                    <p className="text-gray-800 font-bold text-lg">{weather.windSpeed} m/s</p>
-                  </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {[{ label: 'Humidity', value: `${weather.humidity}%` }, { label: 'Wind Speed', value: `${weather.windSpeed} m/s` }].map(({ label, value }) => (
+                    <div key={label} style={{ background: 'white', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                      <p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 4px' }}>{label}</p>
+                      <p style={{ fontWeight: '700', fontSize: '18px', margin: 0, color: '#111' }}>{value}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              {/* Farming Insight */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
-                <p className="text-yellow-800 font-bold text-sm uppercase tracking-wide mb-2">
-                  🌾 Today's Farming Insight
-                </p>
-                <p className="text-gray-700 text-base">
-                  {weather.icon} {weather.insight}
-                </p>
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '14px', padding: '20px' }}>
+                <p style={{ color: '#92400e', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>🌾 Today's Farming Insight</p>
+                <p style={{ color: '#374151', fontSize: '15px', margin: 0, lineHeight: '1.6' }}>{weather.icon} {weather.insight}</p>
               </div>
             </div>
           )}
-
           {!weather && !weatherLoading && !weatherError && (
-            <div className="text-center py-8 text-gray-400">
-              <p className="text-4xl mb-3">🌍</p>
-              <p className="text-sm">Search for your city to see weather conditions and farming tips</p>
+            <div style={{ textAlign: 'center', padding: '32px', color: '#9ca3af' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>🌍</div>
+              <p style={{ fontSize: '14px' }}>Search for your city to see weather conditions and farming tips</p>
             </div>
           )}
         </div>
 
-        {/* Tips Card */}
-        <div className="bg-white rounded-2xl shadow-md p-6">
-          <h2 className="text-gray-800 font-bold text-lg mb-4">📋 General Farming Tips</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { icon: '💧', tip: 'Water crops early morning to reduce evaporation.' },
-              { icon: '🌱', tip: 'Rotate crops each season to maintain soil health.' },
-              { icon: '🐛', tip: 'Regularly inspect crops for pests and diseases.' },
-              { icon: '📦', tip: 'Keep records of your yield for better planning.' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-start space-x-3 bg-gray-50 rounded-xl p-4">
-                <span className="text-2xl">{item.icon}</span>
-                <p className="text-gray-600 text-sm">{item.tip}</p>
+        {/* Tips */}
+        <div style={{ background: 'white', borderRadius: '20px', padding: '28px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#111' }}>📋 General Farming Tips</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            {tips.map(({ icon, title, tip }) => (
+              <div key={title} style={{ background: '#f9fafb', borderRadius: '14px', padding: '20px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '28px', flexShrink: 0 }}>{icon}</span>
+                <div>
+                  <p style={{ fontWeight: '600', fontSize: '14px', margin: '0 0 4px', color: '#111' }}>{title}</p>
+                  <p style={{ color: '#6b7280', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{tip}</p>
+                </div>
               </div>
             ))}
           </div>

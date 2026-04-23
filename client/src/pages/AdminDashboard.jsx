@@ -17,220 +17,140 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [farmersRes, statsRes] = await Promise.all([
-        API.get('/farmers'),
-        API.get('/farmers/stats')
-      ]);
+      const [farmersRes, statsRes] = await Promise.all([API.get('/farmers'), API.get('/farmers/stats')]);
       setFarmers(farmersRes.data.farmers);
       setStats(statsRes.data);
-    } catch (err) {
-      setError('Failed to load data. Please refresh.');
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError('Failed to load data.'); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  const showSuccess = (msg) => {
-    setSuccess(msg);
-    setTimeout(() => setSuccess(''), 3000);
-  };
-
-  const handleAdd = () => {
-    setSelectedFarmer(null);
-    setModalOpen(true);
-  };
-
-  const handleEdit = (farmer) => {
-    setSelectedFarmer(farmer);
-    setModalOpen(true);
-  };
+  const showSuccess = (msg) => { setSuccess(msg); setTimeout(() => setSuccess(''), 3000); };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
-    try {
-      await API.delete(`/farmers/${id}`);
-      showSuccess(`${name} has been deleted.`);
-      fetchData();
-    } catch (err) {
-      setError('Failed to delete farmer.');
-    }
+    if (!window.confirm(`Delete ${name}?`)) return;
+    try { await API.delete(`/farmers/${id}`); showSuccess(`${name} deleted.`); fetchData(); }
+    catch { setError('Failed to delete farmer.'); }
   };
 
   const handleModalSubmit = async (form) => {
-    setSubmitLoading(true);
-    setError('');
+    setSubmitLoading(true); setError('');
     try {
-      if (selectedFarmer) {
-        await API.put(`/farmers/${selectedFarmer.id}`, form);
-        showSuccess('Farmer updated successfully!');
-      } else {
-        await API.post('/farmers', form);
-        showSuccess('Farmer added successfully!');
-      }
-      setModalOpen(false);
-      fetchData();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Operation failed. Please try again.');
-    } finally {
-      setSubmitLoading(false);
-    }
+      if (selectedFarmer) { await API.put(`/farmers/${selectedFarmer.id}`, form); showSuccess('Farmer updated!'); }
+      else { await API.post('/farmers', form); showSuccess('Farmer added!'); }
+      setModalOpen(false); fetchData();
+    } catch (err) { setError(err.response?.data?.message || 'Operation failed.'); }
+    finally { setSubmitLoading(false); }
   };
 
-  const filteredFarmers = farmers.filter(f =>
-    f.name.toLowerCase().includes(search.toLowerCase()) ||
-    f.email.toLowerCase().includes(search.toLowerCase()) ||
-    (f.location || '').toLowerCase().includes(search.toLowerCase()) ||
-    (f.crop || '').toLowerCase().includes(search.toLowerCase())
+  const filtered = farmers.filter(f =>
+    [f.name, f.email, f.location, f.crop].some(v => v?.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#f0fdf4' }}>
       <Navbar />
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">🛠️ Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1">Manage all registered farmers on Farm Mall</p>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111', margin: '0 0 6px' }}>🛠️ Admin Dashboard</h1>
+          <p style={{ color: '#6b7280', fontSize: '15px', margin: 0 }}>Manage all registered farmers on Farm Mall</p>
         </div>
 
-        {/* Alerts */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-4">
-            ⚠️ {error}
-          </div>
-        )}
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">
-            ✅ {success}
-          </div>
-        )}
+        {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', marginBottom: '16px' }}>⚠️ {error}</div>}
+        {success && <div style={{ background: '#f0fdf4', border: '1px solid #86efac', color: '#166534', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', marginBottom: '16px' }}>✅ {success}</div>}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-md p-6 flex items-center space-x-4">
-            <div className="bg-green-100 rounded-full p-4">
-              <span className="text-3xl">👨‍🌾</span>
-            </div>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ background: '#f0fdf4', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>👨‍🌾</div>
             <div>
-              <p className="text-gray-500 text-sm">Total Farmers</p>
-              <p className="text-green-700 font-bold text-3xl">{stats.total}</p>
+              <p style={{ color: '#6b7280', fontSize: '13px', margin: '0 0 4px' }}>Total Farmers</p>
+              <p style={{ color: '#166534', fontWeight: '700', fontSize: '32px', margin: 0 }}>{stats.total}</p>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-md p-6 flex items-center space-x-4">
-            <div className="bg-blue-100 rounded-full p-4">
-              <span className="text-3xl">📋</span>
-            </div>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ background: '#eff6ff', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>📋</div>
             <div>
-              <p className="text-gray-500 text-sm">Showing Now</p>
-              <p className="text-blue-700 font-bold text-3xl">{filteredFarmers.length}</p>
+              <p style={{ color: '#6b7280', fontSize: '13px', margin: '0 0 4px' }}>Showing Now</p>
+              <p style={{ color: '#1d4ed8', fontWeight: '700', fontSize: '32px', margin: 0 }}>{filtered.length}</p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-green-700 to-green-600 rounded-2xl shadow-md p-6 flex items-center space-x-4">
-            <div className="bg-white bg-opacity-20 rounded-full p-4">
-              <span className="text-3xl">🌱</span>
-            </div>
+          <div style={{ background: 'linear-gradient(135deg, #166534, #15803d)', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(22,101,52,0.3)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>🌱</div>
             <div>
-              <p className="text-green-200 text-sm">Platform</p>
-              <p className="text-white font-bold text-xl">Farm Mall</p>
+              <p style={{ color: '#86efac', fontSize: '13px', margin: '0 0 4px' }}>Platform</p>
+              <p style={{ color: 'white', fontWeight: '700', fontSize: '20px', margin: 0 }}>Farm Mall</p>
             </div>
           </div>
         </div>
 
-        {/* Farmers Table */}
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h2 className="text-gray-800 font-bold text-lg">All Farmers</h2>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name, email, crop..."
-                className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-64"
-              />
-              <button
-                onClick={handleAdd}
-                className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap"
-              >
+        {/* Table */}
+        <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#111', margin: 0 }}>All Farmers</h2>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search farmers..."
+                style={{ border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '10px 16px', fontSize: '14px', outline: 'none', width: '220px', boxSizing: 'border-box' }}
+                onFocus={e => e.target.style.borderColor = '#166534'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+              <button onClick={() => { setSelectedFarmer(null); setModalOpen(true); }}
+                style={{ background: '#166534', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
                 + Add Farmer
               </button>
             </div>
           </div>
 
           {loading ? (
-            <div className="text-center py-16">
-              <div className="text-4xl mb-4">🌱</div>
-              <p className="text-gray-400 text-sm">Loading farmers...</p>
+            <div style={{ textAlign: 'center', padding: '60px', color: '#9ca3af' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>🌱</div>
+              <p>Loading farmers...</p>
             </div>
-          ) : filteredFarmers.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-5xl mb-4">👨‍🌾</div>
-              <p className="text-gray-500 font-medium">
-                {search ? 'No farmers match your search.' : 'No farmers registered yet.'}
-              </p>
-              {!search && (
-                <button
-                  onClick={handleAdd}
-                  className="mt-4 bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-green-800 transition"
-                >
-                  Add your first farmer
-                </button>
-              )}
+          ) : filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px', color: '#9ca3af' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>👨‍🌾</div>
+              <p style={{ fontWeight: '500', fontSize: '16px', color: '#6b7280' }}>{search ? 'No farmers match your search.' : 'No farmers yet.'}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Crop</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                <thead>
+                  <tr style={{ background: '#f9fafb' }}>
+                    {['#', 'Name', 'Email', 'Location', 'Crop', 'Phone', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #f3f4f6' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredFarmers.map((farmer, index) => (
-                    <tr key={farmer.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 text-gray-400">{index + 1}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="bg-green-100 rounded-full w-9 h-9 flex items-center justify-center text-green-700 font-bold text-sm flex-shrink-0">
+                <tbody>
+                  {filtered.map((farmer, i) => (
+                    <tr key={farmer.id} style={{ borderBottom: '1px solid #f9fafb', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'white'}>
+                      <td style={{ padding: '16px 20px', color: '#9ca3af' }}>{i + 1}</td>
+                      <td style={{ padding: '16px 20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ background: '#dcfce7', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#166534', fontWeight: '700', fontSize: '14px', flexShrink: 0 }}>
                             {farmer.name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-medium text-gray-800">{farmer.name}</span>
+                          <span style={{ fontWeight: '500', color: '#111' }}>{farmer.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{farmer.email}</td>
-                      <td className="px-6 py-4 text-gray-600">{farmer.location || <span className="text-gray-300">—</span>}</td>
-                      <td className="px-6 py-4">
-                        {farmer.crop ? (
-                          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                            {farmer.crop}
-                          </span>
-                        ) : <span className="text-gray-300">—</span>}
+                      <td style={{ padding: '16px 20px', color: '#6b7280' }}>{farmer.email}</td>
+                      <td style={{ padding: '16px 20px', color: '#6b7280' }}>{farmer.location || '—'}</td>
+                      <td style={{ padding: '16px 20px' }}>
+                        {farmer.crop
+                          ? <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500' }}>{farmer.crop}</span>
+                          : <span style={{ color: '#d1d5db' }}>—</span>}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{farmer.phone || <span className="text-gray-300">—</span>}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleEdit(farmer)}
-                            className="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-                          >
+                      <td style={{ padding: '16px 20px', color: '#6b7280' }}>{farmer.phone || '—'}</td>
+                      <td style={{ padding: '16px 20px' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => { setSelectedFarmer(farmer); setModalOpen(true); }}
+                            style={{ background: '#eff6ff', color: '#1d4ed8', border: 'none', padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
                             ✏️ Edit
                           </button>
-                          <button
-                            onClick={() => handleDelete(farmer.id, farmer.name)}
-                            className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-                          >
-                            🗑️ Delete
+                          <button onClick={() => handleDelete(farmer.id, farmer.name)}
+                            style={{ background: '#fef2f2', color: '#dc2626', border: 'none', padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                            🗑️ Del
                           </button>
                         </div>
                       </td>
@@ -242,14 +162,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-
-      <FarmerModal
-        isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); setError(''); }}
-        onSubmit={handleModalSubmit}
-        farmer={selectedFarmer}
-        loading={submitLoading}
-      />
+      <FarmerModal isOpen={modalOpen} onClose={() => { setModalOpen(false); setError(''); }} onSubmit={handleModalSubmit} farmer={selectedFarmer} loading={submitLoading} />
     </div>
   );
 };
